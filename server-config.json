@@ -1,0 +1,7 @@
+{
+    "auto_connect":true,
+    "ports":{
+        "local":4000,
+        "lan":80
+    }
+}

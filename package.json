@@ -1,0 +1,20 @@
+{
+  "name": "personal-server",
+  "version": "1.0.0",
+  "description": "Personal server for general user",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Daniel Silva Rocha",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.3",
+    "inquirer": "^8.2.1",
+    "optionator": "^0.9.1",
+    "winston": "^3.6.0"
+  },
+  "devDependencies": {
+    "mocha": "^9.2.2"
+  }
+}
