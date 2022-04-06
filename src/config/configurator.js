@@ -1,4 +1,5 @@
 var misc = require("./misc");
+var isType = require("./types");
 var eventEmitter = require("events");
 class Configurator extends eventEmitter{
     #configs  = {};
@@ -15,17 +16,22 @@ class Configurator extends eventEmitter{
             obj.forEach(value =>this.putConfig(value));
         };
         let name = obj.name;
-        let type = obj.type;
-        let on_change = obj.on_change;
+        let type = obj.type || "any";
+        let on_active = obj.on_active || function(){};
         let isSugar = obj.sugar;
         if(this.#configs[name] && !this.#override){
             throw "Config already registred"
         };
-        
+        this.#configs[name] = {name,type,on_active,isSugar}
     };
     putObjectReader(obj){
-
     };
+		getConfig(configName){
+			if(!this.#configs[configName]){
+				return false;
+			}
+			return Object.assign({},this.#configs[configName]);
+		};
     get override(){
         return this.#override;
     };
@@ -36,38 +42,20 @@ class Configurator extends eventEmitter{
             throw misc.generateError("invalid_type",[true,value,"arg value"]);
         }
     }
-    set(config,value){
-
+    set(configName,value){
+			let config = this.#configs[configName];
+			if(!config){
+				throw "invalid config";
+			}
+			let type = config.type;
+			if(isType(type,value)){
+				this.#values[configName] = value;
+			}
     };
     get(config){
 
     };
 }
-function isTypesEqual(value1,value2){
-    value1 = value1.toLowerCase();
-    value2 = value2.toLowerCase();
-    
-};
-function getType(value){
-    const specialCases = {
-        number:()=>{
-            if(Number.isInteger(value)){
-                return "int";
-            }else{
-                return "float";
-            }
-        },
-        string:() =>{
-            return "text"
-        }
-    };
-    const genericType = typeof value;
-    const special = specialCases[genericType];
-    if(special){
-        return special();
-    }else{
-        return genericType;
-    }
-}
+
 new Configurator().putConfig([{},{name:"test"}]);
 module.exports = Configurator

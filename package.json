@@ -11,6 +11,7 @@
   "dependencies": {
     "express": "^4.17.3",
     "inquirer": "^8.2.1",
+    "nyc": "^15.1.0",
     "optionator": "^0.9.1",
     "winston": "^3.6.0"
   },

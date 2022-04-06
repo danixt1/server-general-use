@@ -3,6 +3,7 @@ const ZONE = "config";
 const LOC = "../src/config"
 const misc = require(LOC+'/misc')
 var assert = require('assert');
+
 describe(ZONE+"/misc",function(){
 	describe("Class Path",function(){
 		it("correct array with string arg",function(){
@@ -38,6 +39,8 @@ describe(ZONE+"/misc",function(){
 });
 describe(ZONE+"/types",function(){
 	const ops = require('../src/config/const');
+	const typer = require('../src/config/types');
+	
 	const validValues ={
 		ANY:undefined,
 		ARRAY:[],
@@ -46,11 +49,31 @@ describe(ZONE+"/types",function(){
 		INT:23,
 		TEXT:""
 	};
-	/*
-	it("test is updated",function(){
+	const validKeys = Object.keys(validValues);
+	
+	it("test is up to data",function(){
 		const opsKey = Object.keys(ops);
-		const validKeys = Object.keys(validValues);
-		assert.strictEqual(opsKey.toString(),validKeys.toString());
+		const fails = [];
+		for(const key of opsKey){
+			if(!validKeys.includes(key)){
+				fails.push(key);
+			}
+		};
+		if(fails.length > 0){
+			assert.ok(false,"test not defined to:"+fails.toString());
+		}else{
+			assert.ok(true);
+		}
+		
 	});
-	*/
+	it("return true for all options",function(){
+		const fails = [];
+		for(const key of validKeys){
+			const selectedType = ops[key];
+			if(!typer(selectedType[0],validValues[key])){
+				fails.push(selectedType[0]);
+			};
+		};
+		assert.ok(fails.length === 0,"returned false to:"+fails.toString());
+	});
 });
