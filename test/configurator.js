@@ -2,8 +2,8 @@
 const ZONE = "config";
 const LOC = "../src/config"
 const misc = require(LOC+'/misc')
+const Configurator = require("../src/config/configurator")
 var assert = require('assert');
-
 describe(ZONE+"/misc",function(){
 	describe("Class Path",function(){
 		it("correct array with string arg",function(){
@@ -17,7 +17,7 @@ describe(ZONE+"/misc",function(){
 			assert.strictEqual(Path.path,"teste.subPart.otherSub","String");
 		})
 	});
-	describe("func getValueInPath",function(){
+	describe("getValueInPath()",function(){
 		let testObj = {
 			part1:{
 				part2:{
@@ -75,5 +75,34 @@ describe(ZONE+"/types",function(){
 			};
 		};
 		assert.ok(fails.length === 0,"returned false to:"+fails.toString());
+	});
+});
+describe(ZONE+"/configurator",function(){
+	let config;
+	this.beforeEach(function(){
+		config = new Configurator();
+	});
+	describe("putConfig()",function(){
+		it("Return default value",function(){
+			config.putConfig({
+				name:"test",
+				type:"string",
+				def:"testing"
+			});
+			assert.strictEqual(config.get("test"),"testing");
+		});
+		it("Throw with incompatible default value",function(){
+			assert.throws(function(){
+				config.putConfig({
+					name:"test",
+					type:"string",
+					def:12
+				});
+			},{
+				error:"invalid_type",
+				expected:"string",
+				returned:"number"
+			})
+		});
 	});
 });

@@ -6,9 +6,10 @@ class Configurator extends eventEmitter{
     #configs  = {};
     #values = {};
     #override = false;
-    #container = {};
-    constructor(){
+    constructor(configs){
         super();
+        if(configs)
+            this.putConfig(configs);
     };
     putConfig(obj){
         if(typeof obj != "object"){
@@ -20,27 +21,28 @@ class Configurator extends eventEmitter{
         };
         let name = obj.name;
         let type = obj.type || "any";
-        let on_active = obj.on_active || function(){};
-        let def = obj.def;
+        let on_active = obj.on_active;
+        let defaultValue = obj.def;
+        let required = obj.required || false;
         if(this.#configs[name] && !this.#override){
             throw "Config already registred"
         };
-        this.#configs[name] = {name,type,on_active,def}
-        if(def != undefined)
-            this.set(name,def);
-    };
-    readJson(obj){
-    };
-    getConfig(configName){
-        if(!this.#configs[configName]){
-            return false;
+        if(typeof on_active === "function"){
+            this.on("change/"+name,on_active);
         }
-        return Object.assign({},this.#configs[configName]);
+        this.#configs[name] = {name,type,notStarted:required}
+        if(defaultValue != undefined)
+            this.set(name,defaultValue);
     };
-    get override(){
+    readAndSetObj(obj){
+        for(const key of obj){
+            this.set(key,obj[key]);
+        };
+    };
+    get allowOverride(){
         return this.#override;
     };
-    set override(value){
+    set allowOverride(value){
         if(typeof value === "boolean"){
             this.#override = value;
         }else{
@@ -53,14 +55,33 @@ class Configurator extends eventEmitter{
             throw "invalid config";
         }
         let type = config.type;
-        if(isType(type,value)){
-            this.#values[configName] = value;
+        if(!isType(type,value)){
+            throw misc.generateError("invalid_type",[type,value,"set arg configName"]);
         }
+        if(!config.isSugar){
+            if(config.notStarted){
+                config.notStarted = false;
+            }
+            this.#values[configName] = value;
+            this.emit("change/"+configName,value);
+            this.emit("change",configName,value);
+            return true;
+        };
+        return false;
     };
     get(config){
+        let confi = this.#configs[config];
+        if(!confi){
+            throw "config "+config + " not exist";
+        };
+        if(confi.notStarted){
+            throw "config "+config + " is required, but no value is passed";
+        };
         return this.#values[config];
     };
+    get notConfigured(){
+
+    }
 }
 
-new Configurator().putConfig([{},{name:"test"}]);
 module.exports = Configurator
