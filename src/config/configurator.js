@@ -25,7 +25,7 @@ class Configurator extends eventEmitter{
         let defaultValue = obj.def;
         let required = obj.required || false;
         if(this.#configs[name] && !this.#override){
-            throw "Config already registred"
+            throw new SyntaxError("config '"+name+"' already been declared");
         };
         if(typeof on_active === "function"){
             this.on("change/"+name,on_active);
@@ -52,33 +52,30 @@ class Configurator extends eventEmitter{
     set(configName,value){
         let config = this.#configs[configName];
         if(!config){
-            throw "invalid config";
+            throw new ReferenceError(configName + " is not defined");
         }
         let type = config.type;
         if(!isType(type,value)){
             throw misc.generateError("invalid_type",[type,value,"set arg configName"]);
         }
-        if(!config.isSugar){
-            if(config.notStarted){
-                config.notStarted = false;
-            }
-            this.#values[configName] = value;
-            this.emit("change/"+configName,value);
-            this.emit("change",configName,value);
-            return true;
-        };
-        return false;
+        if(config.notStarted){
+            config.notStarted = false;
+        }
+        this.#values[configName] = value;
+        this.emit("change/"+configName,value);
+        this.emit("change",configName,value);
     };
-    get(config){
-        let confi = this.#configs[config];
-        if(!confi){
-            throw "config "+config + " not exist";
+    get(configName){
+        let config = this.#configs[configName];
+        if(!config){
+            throw new ReferenceError(configName + " is not defined");
         };
-        if(confi.notStarted){
-            throw "config "+config + " is required, but no value is passed";
+        if(config.notStarted){
+            throw {name:"notInitialized",message:configName + " not started"};
         };
-        return this.#values[config];
+        return this.#values[configName];
     };
+    exist =(config)=>typeof this.#configs[config] === "object";
     get notConfigured(){
 
     }

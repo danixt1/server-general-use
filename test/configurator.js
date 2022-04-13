@@ -1,7 +1,7 @@
 //const configurator = require('../src/config/configurator.js');
 const ZONE = "config";
 const LOC = "../src/config"
-const misc = require(LOC+'/misc')
+const misc = require("../src/config/misc")
 const Configurator = require("../src/config/configurator")
 var assert = require('assert');
 describe(ZONE+"/misc",function(){
@@ -79,30 +79,81 @@ describe(ZONE+"/types",function(){
 });
 describe(ZONE+"/configurator",function(){
 	let config;
+	let defConfig;
 	this.beforeEach(function(){
 		config = new Configurator();
+		defConfig = {name:"test",type:"string"}
+	});
+	it("set and return value",function(){
+		config.putConfig(defConfig);
+		config.set("test","testing");
+		assert.strictEqual(config.get("test"),"testing");
+	});
+	describe("get()",function(){
+		it("Throw case config not exist",function(){
+			assert.throws(function(){
+				config.get("test");
+			})
+		},{
+			name:"ReferenceError"
+		});
+		it("Throw case required option is on, and called get() before set()",function(){
+			assert.throws(()=>{
+				defConfig.required = true;
+				config.putConfig(defConfig);
+				config.get("test");
+			},{name:"notInitialized"})
+		});
+		it("Not throw with assigned value in property with required",function(){
+			assert.doesNotThrow(()=>{
+				defConfig.required = true;
+				config.putConfig(defConfig);
+				config.set("test","testing");
+				config.get("test");
+			})
+		});
+	});
+	describe("set()",function(){
+		it("Throw case config not exist",function(){
+			assert.throws(()=>{
+				config.set("test");
+			},{
+				name:"ReferenceError"
+			})
+		});
+		it("Throw case type is invalid",function(){
+			assert.throws(()=>{
+				config.putConfig(defConfig);
+				config.set("test",22);
+			},{
+				name:"invalid_type"
+			})
+		});
+		it("Event change activated",function(){
+			config.putConfig(defConfig);
+			config.on("change/test",(a,b)=>{
+				assert.ok(true);
+			})
+		});
 	});
 	describe("putConfig()",function(){
 		it("Return default value",function(){
-			config.putConfig({
-				name:"test",
-				type:"string",
-				def:"testing"
-			});
+			defConfig.def = "testing";
+			config.putConfig(defConfig);
 			assert.strictEqual(config.get("test"),"testing");
 		});
 		it("Throw with incompatible default value",function(){
 			assert.throws(function(){
-				config.putConfig({
-					name:"test",
-					type:"string",
-					def:12
-				});
-			},{
-				error:"invalid_type",
-				expected:"string",
-				returned:"number"
-			})
+				defConfig.def = 12;
+				config.putConfig(defConfig);
+			},misc.generateError("invalid_type",["string",12,"set arg configName"]))
+		});
+		it("Throw on overriding configuration",function(){
+			assert.throws(function(){
+				for(let a =0;a < 2;a++){
+					config.putConfig(defConfig);
+				};
+			},{name:"SyntaxError"});
 		});
 	});
 });

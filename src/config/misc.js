@@ -28,7 +28,7 @@ class Path{
 }
 function generateError(errorName,arrData = []){
 	var initial = {
-		error:errorName,
+		name:errorName,
 	};
 	var detail = {}
 	switch(errorName){
