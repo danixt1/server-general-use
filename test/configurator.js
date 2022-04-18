@@ -85,6 +85,7 @@ describe(ZONE+"/configurator",function(){
 		defConfig = {name:"test",type:"string"}
 	});
 	it("set and return value",function(){
+		this.slow(20);
 		config.putConfig(defConfig);
 		config.set("test","testing");
 		assert.strictEqual(config.get("test"),"testing");
@@ -131,9 +132,12 @@ describe(ZONE+"/configurator",function(){
 		});
 		it("Event change activated",function(){
 			config.putConfig(defConfig);
+			let eventActivated = false;
 			config.on("change/test",(a,b)=>{
-				assert.ok(true);
-			})
+				eventActivated = true;
+			});
+			config.set("test","n");
+			assert.ok(eventActivated);
 		});
 	});
 	describe("putConfig()",function(){

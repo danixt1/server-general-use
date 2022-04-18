@@ -6,13 +6,11 @@ class Path{
 			this.#path = pathItem;
 			this.#pathArray = pathItem.split(/[/.]/g);
 		}else{
-			this.#pathArray = [...pathItem];
-			for(let a = 0;a < pathItem.length;a++){
-				this.#path += pathItem[a];
-				if((a+1) < pathItem.length){
-					this.#path+='.';
-				}
+			if(!Array.isArray(pathItem)){
+				throw generateError("invalid_type",["string | array<string>",pathItem,"arg pathItem"]);
 			}
+			this.#pathArray = [...pathItem];
+			this.#path = this.#pathArray.join(".");
 		}
 		
 	};

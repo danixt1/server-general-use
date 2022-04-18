@@ -1,4 +1,7 @@
 import EventEmitter from "events";
+/**
+ * Basic object to add a new configuration
+ */
 export interface objConfig{
     name:string,
     type:string,
@@ -16,6 +19,10 @@ export = class Configurator extends EventEmitter{
      */
     public putConfig(obj:objConfig | objConfig[]):void;
     public readAndSetObj(obj:any):void;
+    /**
+     * Return all configurations with no value and property required is true
+     */
+    get notConfigured():Array<string>;
     get allowOverride():boolean;
     set allowOverride(value:boolean);
     public set(configName:string,value:any):boolean;
